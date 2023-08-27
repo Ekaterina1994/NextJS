@@ -1,4 +1,4 @@
-# JSNext.js test case
+# Next.js test case
 
 Interactive graphics component with column animation.
 
