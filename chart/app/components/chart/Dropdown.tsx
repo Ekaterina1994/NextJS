@@ -1,95 +1,16 @@
 "use client";
 import { Fragment, useState, useEffect } from "react";
 import { Listbox, Transition } from "@headlessui/react";
-
 import { Bar } from "react-chartjs-2";
-import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from "chart.js";
-import 'chartjs-plugin-style';
+import { Chart as ChartJS, CategoryScale, LinearScale, BarElement } from "chart.js";
+import { periods, dropdownValues, DropdownValues } from "../periods";
 
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
-)
+ChartJS.register(CategoryScale, LinearScale, BarElement);
 
-const periods = [{
-  "earnings": {
-    "year_sum": 0,
-    "six_month_sum": 0,
-    "last_month_sum": 0
-  },
-  "graph": {
-    "year": {
-      "January": 5100,
-      "February": 560,
-      "March": 5100,
-      "April": 560,
-      "May": 560,
-      "June": 5100,
-      "July": 5100,
-      "August": 560,
-      "September": 560,
-      "October": 560,
-      "November": 5100,
-      "December": 5100
-    },
-    "half_year": {
-      "January": 5100,
-      "February": 560,
-      "March": 5100,
-      "April": 5100,
-      "May": 560,
-      "June": 5100
-    },
-    "month": {
-      "1": 5100,
-      "2": 5100,
-      "3": 5100,
-      "4": 5100,
-      "5": 560,
-      "6": 560,
-      "7": 5100,
-      "8": 5100,
-      "9": 560,
-      "10": 5100,
-      "11": 560,
-      "12": 5100,
-      "13": 5100,
-      "14": 560,
-      "15": 5100,
-      "16": 5100,
-      "17": 5100,
-      "18": 560,
-      "19": 560,
-      "20": 5100,
-      "21": 5100,
-      "22": 5100,
-      "23": 5100,
-      "24":  560,
-      "25": 560,
-      "26": 560,
-      "27": 5100,
-      "28": 5100,
-      "29": 5100,
-      "30": 5100,
-      "31": 5100
-    }
-  }
-}
-]
-
-const dropdownValues = [
-  { title: "За последний месяц", value: "month" },
-  { title: "За последний год", value: "year" },
-  { title: "За последние 6 месяцев", value: "sixMonth" },
-];
 
 export default function Dropdown() {
   const [selected, setSelected] = useState(dropdownValues[0]);
-  const [value, setValue] = useState("month");
+  const [value, setValue] = useState(dropdownValues[0].value);
 
 
   const [chartData, setChartData] = useState({
@@ -101,6 +22,7 @@ export default function Dropdown() {
   useEffect(() => {
 
     let label;
+    let values;
 
     if(value === "month") {
       label = Object.keys(periods[0].graph.month);
@@ -110,14 +32,13 @@ export default function Dropdown() {
       label = Object.keys(periods[0].graph.year);
     }
   
-    let values = Object.values(periods[0].graph.year);
     if(value === "month") {
       values = Object.values(periods[0].graph.month);
     } else if (value === "sixMonth") {
       values = Object.values(periods[0].graph.half_year)
+    } else {
+      values = Object.values(periods[0].graph.year)
     };
-
-    const ticksArray = [0, 100, 200, 500, 1000, 2000, 5000 ];
 
     setChartData({
       labels: label.map((item) => item),
@@ -125,12 +46,7 @@ export default function Dropdown() {
         data: values.map((item) => item),
         backgroundColor: "blue",
         borderRadius: 4,
-        width: 15,
-        barThickness: 16,
-        shadowOffsetX: 3,
-        shadowOffsetY: 3,
-        shadowBlur: 10,
-        shadowColor: 'rgba(0, 0, 0, 0.5)',
+        barThickness: 16
       }],
     },
     );
@@ -142,23 +58,20 @@ export default function Dropdown() {
             drawBorder: false,
           },
           ticks: {
-            // For a category axis, the val is the index so the lookup via getLabelForValue is needed
-            callback: function(val, index) {
-              // Hide every 2nd tick label
+            callback: function (val: number, index: number): string | undefined {
+              let currentValue = this.getLabelForValue(val);
               if (selected.value === "month") {
                 if (index === 0) {
-                  return `0${this.getLabelForValue(val)}`;
+                  return `0${currentValue}`;
                 } else if (index % 5 === 0) {
                   if (val < 10) {
-                    return `0${this.getLabelForValue(val - 1)}`;
+                    return `0${currentValue - 1}`;
                   } else {
-                    return this.getLabelForValue(val - 1);
+                    return `${currentValue - 1}`;
                   }
-                } else {
-                  return "";
-                }
+                } else if (index % 5 !== 0) {return ""}
               } else {
-                return this.getLabelForValue(val);
+                return currentValue;
               }
             },
           }
@@ -180,13 +93,12 @@ export default function Dropdown() {
     )
   }, [value])
   
-  const onChange = (selected) => {
+  const onChange = (selected: DropdownValues) => {
     setSelected(selected);
     console.log(selected);
     setValue(selected.value);
     console.log(value);
   }
-
 
   return (
     <div className="w-[995px] relative h-[476px] mx-0 my-auto">
