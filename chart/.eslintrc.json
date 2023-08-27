@@ -1,6 +1,25 @@
 {
+  "env": {
+    "browser": true,
+    "node": true,
+    "es2021": true
+  },
   "plugins": ["@typescript-eslint"],
-  "extends": ["next/core-web-vitals", "next", "plugin:@typescript-eslint/recommended"],
+  "extends": [
+    "next/core-web-vitals",
+    "next",
+    "plugin:@typescript-eslint/recommended",
+    "eslint-plugin-react",
+
+    "eslint:recommended",
+    "plugin:react/recommended",
+    "plugin:@typescript-eslint/eslint-recommended"
+  ],
+  "parserOptions": {
+    "ecmaFeatures": { "jsx": true },
+    "ecmaVersion": 12,
+    "sourceType": "module"
+  },
   "rules": {
     "react/react-in-jsx-scope": "off",
     "no-tabs": ["error", { "allowIndentationTabs": true }],
