@@ -3,7 +3,8 @@ import { Fragment, useState, useEffect } from "react";
 import { Listbox, Transition } from "@headlessui/react";
 
 import { Bar } from "react-chartjs-2";
-import {Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend} from "chart.js";
+import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from "chart.js";
+import 'chartjs-plugin-style';
 
 ChartJS.register(
   CategoryScale,
@@ -116,26 +117,56 @@ export default function Dropdown() {
       values = Object.values(periods[0].graph.half_year)
     };
 
+    const ticksArray = [0, 100, 200, 500, 1000, 2000, 5000 ];
+
     setChartData({
       labels: label.map((item) => item),
       datasets: [{
         data: values.map((item) => item),
         backgroundColor: "blue",
-        borderRadius: "4px",
+        borderRadius: 4,
+        width: 15,
+        barThickness: 16,
+        shadowOffsetX: 3,
+        shadowOffsetY: 3,
+        shadowBlur: 10,
+        shadowColor: 'rgba(0, 0, 0, 0.5)',
       }],
-    });
+    },
+    );
     setChartOptions({
       scales: {
         x: {
           grid: {
-            display: false
+            display: false,
+            drawBorder: false,
           },
+          ticks: {
+            // For a category axis, the val is the index so the lookup via getLabelForValue is needed
+            callback: function(val, index) {
+              // Hide every 2nd tick label
+              if (selected.value === "month") {
+                if (index === 0) {
+                  return `0${this.getLabelForValue(val)}`;
+                } else if (index % 5 === 0) {
+                  if (val < 10) {
+                    return `0${this.getLabelForValue(val - 1)}`;
+                  } else {
+                    return this.getLabelForValue(val - 1);
+                  }
+                } else {
+                  return "";
+                }
+              } else {
+                return this.getLabelForValue(val);
+              }
+            },
+          }
         },
         y: {
           grid: {
             display: false
           },
-        ticks: [0, 100, 200, 500],
         },
         },
         plugins: {
